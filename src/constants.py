@@ -1,14 +1,9 @@
 import numpy as np
 
-# nondimensional units: G = 1, m_i = 1
-G = 1.0
-M = np.array([1.0, 1.0, 1.0])
-T_REF = 6.3259  # reference period for figure-eight
-
-# default horizons and steps
-N_PERIODS = 50
-DT_COARSE = T_REF / 400.0  # ~0.0158
-DT_FINE   = T_REF / 800.0  # ~0.0079
-
-# safety
-R_MIN_COLLISION = 1e-3
+MU = 1.0
+A = 1.0
+E = 0.99
+R_P = A * (1 - E)
+V_P = np.sqrt(MU * (1 + E) / (A * (1 - E)))
+T_ORBIT = 2 * np.pi * np.sqrt(A**3 / MU)
+T_TOTAL = 1000 * T_ORBIT

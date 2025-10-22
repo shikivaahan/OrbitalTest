@@ -1,1 +1,1 @@
-# package marker
+# Long-term orbit challenge package

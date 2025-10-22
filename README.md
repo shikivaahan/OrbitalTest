@@ -1,92 +1,169 @@
-# Planar 3-Body Integrator Challenge — Conserve Energy, Stay Periodic
+# Long-Term Orbital Stability Challenge
 
-**Your task:** implement a numerical integrator for the **planar Newtonian 3-body problem** and keep the system's invariants (total energy and angular momentum) nearly constant over a long run. We'll also check how close you return to the initial state after each known period of the **figure-eight choreography** (three equal masses chasing each other in an ∞).
+You will simulate **a two-body orbit** with extremely high eccentricity (**e = 0.99**) around a fixed central mass, for **1000 full revolutions**.
+
+Your task:
+- Implement your own numerical integration scheme in `src/stepper.py`.
+- Decide how to set the timestep (`dt`) as the simulation progresses.
+- Produce a physically consistent orbit that remains bound for 1000 orbits.
+- Your performance will be judged on:
+  1. **Energy drift**
+  2. **Angular momentum drift**
+  3. **Runtime**
+
+No additional numerical methods libraries (e.g., SciPy integrators) are allowed.
+You may only use **NumPy** and your own code.
 
 ---
 
-## Physics (nondimensional)
+## 🌍 The Physical Model
 
-For three unit masses (m=1) and G=1:
+A point mass of unit mass orbits a fixed central mass $\mu = 1$ under Newtonian gravity:
 
 $$
-\dot{\mathbf r}_i = \mathbf v_i,\qquad
-\dot{\mathbf v}_i = \sum_{j\ne i} \frac{\mathbf r_j-\mathbf r_i}{\|\mathbf r_j-\mathbf r_i\|^3}.
-$$
-
-**Invariants:**
-- **Total energy**
-$$
-E = \sum_i \tfrac12 \|\mathbf v_i\|^2 - \sum_{i<j}\frac{1}{\|\mathbf r_i-\mathbf r_j\|}.
-$$
-- **Angular momentum (z)**
-$$
-L_z = \sum_i (\mathbf r_i \times \mathbf v_i)_z.
+\ddot{\mathbf{r}} = -\frac{\mu \mathbf{r}}{r^3}
 $$
 
-**Initial conditions (figure-eight choreography):**
+where $\mathbf{r} = (x, y)$ and $r = \|\mathbf{r}\|$.
 
+---
+
+## 🌀 Initial Conditions
+
+We choose a **highly eccentric** Keplerian orbit:
+
+- Semi-major axis $a = 1$
+- Eccentricity $e = 0.99$
+- Start at periapsis:
+  $$
+  \mathbf{r}(0) = (r_p, 0), \quad \mathbf{v}(0) = (0, v_p)
+  $$
+  where
+  $$
+  r_p = a(1 - e) = 0.01, \quad v_p = \sqrt{\frac{\mu(1 + e)}{a(1 - e)}} = \sqrt{199}
+  $$
+
+Hence:
+
+```python
+r0 = [0.01, 0.0]
+v0 = [0.0, sqrt(199.0)]
 ```
-r1 = (-0.97000436,  0.24308753); v1 = ( 0.466203685,  0.43236573)
-r2 = ( 0.97000436, -0.24308753); v2 = ( 0.466203685,  0.43236573)
-r3 = ( 0.0      ,   0.0      ); v3 = (-0.93240737 , -0.86473146)
+
+Expected orbital period:
+$$
+T = 2\pi a^{3/2} = 2\pi \approx 6.283185
+$$
+
+Integrate for **1000 orbits**, total time $T_{total} = 1000 \times T \approx 6283.185$.
+
+---
+
+## 💻 What You Must Implement
+
+In `src/stepper.py` implement:
+
+```python
+def integrate(r0, v0, mu, t_final):
+    """
+    Integrate motion from t=0 to t_final.
+    You must decide:
+      - what integration scheme to use
+      - how to select dt throughout the simulation
+
+    Args:
+        r0: np.ndarray (2,) initial position
+        v0: np.ndarray (2,) initial velocity
+        mu: float (gravitational parameter)
+        t_final: float (total simulation time)
+
+    Returns:
+        times: np.ndarray [N]
+        positions: np.ndarray [N, 2]
+        velocities: np.ndarray [N, 2]
+    """
+    raise NotImplementedError
 ```
 
-Reference period: **T ≈ 6.3259** (nondimensional).
+You must not import or call any external integrators.
+You may write helper functions in the same file (e.g. `accel(r, mu)`).
 
 ---
 
-## What you implement (edit `src/stepper.py`)
+## 🧮 Scoring Metrics
 
-- `advance(r, v, dt) -> (r_next, v_next)`  
-  One step of your scheme (e.g., Velocity-Verlet/Leapfrog *or* RK4).  
-- `integrate(r0, v0, dt, nsteps, sample_every=1)`  
-  Repeated stepping; return final state and sampled invariant histories.
+After running 1000 orbits, the harness will compute:
 
-**Rules:**
-- Fixed step (we give `dt`); no adaptive libraries.
-- Use `numpy` and `float64`.
-- Deterministic.
+**Relative energy drift**
 
----
-
-## Scoring (higher is better)
-
-We integrate the figure-eight for many periods (e.g., 50) with a fixed `dt`. We compute:
-
-- Max relative energy drift:  
-  $$E_\text{rel}=\max_t |E(t)-E(0)|/|E(0)|$$
-- Max relative angular momentum drift:  
-  $$L_\text{rel}=\max_t |L_z(t)-L_z(0)|/\max(1,|L_z(0)|)$$
-- Period return error at kT, k=1..N:  
-  $$d_k = \frac{\sqrt{\sum_i \|r_i(kT)-r_i(0)\|^2 + \sum_i \|v_i(kT)-v_i(0)\|^2}}{\sqrt{\sum_i \|r_i(0)\|^2 + \sum_i \|v_i(0)\|^2}}$$  
-  $$d_\text{max}=\max_k d_k$$
-
-**Score:**
 $$
-\text{score} =
-\log_{10}\!\frac{1}{E_\text{rel}+10^{-16}} +
-0.5\log_{10}\!\frac{1}{L_\text{rel}+10^{-16}} +
-\log_{10}\!\frac{1}{d_\text{max}+10^{-16}} -
-0.05\,\log_{10}(1+\text{runtime\_ms})
+\Delta E = \frac{|E(t_{end}) - E(0)|}{|E(0)|}
 $$
 
-**Hard fails:** NaNs/Infs or a collision (min pair distance < `1e-3`) → score = −∞.
+where $E = \frac{1}{2}v^2 - \mu/r$.
+
+**Relative angular momentum drift**
+
+$$
+\Delta L = \frac{|L_z(t_{end}) - L_z(0)|}{|L_z(0)|}
+$$
+
+where $L_z = r_x v_y - r_y v_x$.
+
+**Runtime (milliseconds)**
+
+Each metric is reported separately — there is no combined score.
+The top performers minimize all three simultaneously.
 
 ---
 
-## How to run
+## 📊 Visualisation
+
+Run:
 
 ```bash
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-
-python run_harness.py        # prints one JSON line with metrics and score
-pytest                       # run public sanity tests
+python -m src.visualize
 ```
 
-## Hints
-- **Symplectic** (Leapfrog/Velocity-Verlet) often beats RK4 on invariants over long time at the same dt.
-- Compute pair forces efficiently: avoid duplicate work and protect divisions by r³ with small eps on collisions (but invalid if <1e-3).
-- Keep your stepper pure (don't mutate in confusing ways); return new arrays or manage reuse carefully.
+This will:
 
-Happy integrating! 🌌
+- Plot your computed trajectory for the first 2 orbits.
+- Overlay a reference ellipse (expected Keplerian orbit).
+- Plot energy and angular momentum drift over time.
+
+---
+
+## ⚠️ Rules
+
+- Do not change provided constants or initial conditions.
+- No external numerical solvers.
+- No symbolic or AI-generated adaptive methods are hinted or expected — reasoning must be your own.
+- Simulations that diverge (NaN/Inf or escape) automatically fail.
+
+---
+
+## 🏁 How to Run and Evaluate
+
+```bash
+python run_harness.py
+```
+
+You'll get output like:
+
+```json
+{
+  "energy_drift": 2.3e-6,
+  "angular_momentum_drift": 4.1e-7,
+  "runtime_ms": 845.3
+}
+```
+
+---
+
+## 🧠 Tips
+
+- Balance step size vs stability.
+- Test shorter runs (10 orbits) first before scaling to 1000.
+- Inspect your trajectory visually — correct orbits should repeat cleanly.
+
+That's all.

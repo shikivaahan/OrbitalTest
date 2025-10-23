@@ -46,7 +46,7 @@ If you create additional local test scripts, do NOT commit them unless essential
 
 We model a point mass (unit mass) orbiting a fixed central body with gravitational parameter mu = 1 under Newtonian gravity:
 
-$$ \ddot{\mathbf{r}} = -\frac{\mu \mathbf{r}}{r^3}, \quad \mathbf{r} = (x,y), \; r = \|\mathbf{r}\| $$
+$$ \ddot{\mathbf{r}} = -\frac{\mu \mathbf{r}}{r^3}, \quad \mathbf{r} = (x,y), \ r = \|\mathbf{r}\| $$
 
 Conserved quantities in exact (continuous) dynamics:
 1. Specific Mechanical Energy: $E = \tfrac{1}{2} v^2 - \mu/r$ (constant for bound Keplerian orbit).
@@ -61,7 +61,7 @@ v0 = [0.0, (39.0)**0.5]  # sqrt(39)
 mu = 1.0
 ```
 
-Because the velocity magnitude changes drastically between periapsis and apoapsis, numerical schemes must remain stable under large curvature near periapsis without collapsing accuracy far away. A well-chosen, simple integrator with a sensible fixed or gently varied timestep is sufficient.
+Because the velocity magnitude changes drastically between periapsis and apoapsis, numerical schemes must remain stable under large curvature near periapsis without collapsing accuracy far away. A well-chosen integrator with a sensible fixed or gently varied timestep is required.
 
 ---
 
@@ -95,13 +95,12 @@ Rules for implementation:
 * Use only NumPy and your own code (no SciPy/ODES integrators).
 * You may add helper functions (e.g. `accel(r, mu)` or a single-step function).
 * Leave a brief top-of-function comment explaining WHY you chose your method.
-* Keep it simple; no elaborate adaptive controllers.
 
 ---
 
 ## 🧮 Scoring Metrics
 
-After a 100 orbit benchmark run (shorter than full 1000 for ranking):
+After a 100 orbit benchmark run:
 
 1. Relative Energy Drift: $\Delta E = |E(t_{end}) - E(0)| / |E(0)|$
 2. Relative Angular Momentum Drift: $\Delta L = |L_z(t_{end}) - L_z(0)| / |L_z(0)|$

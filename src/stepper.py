@@ -1,20 +1,16 @@
+from __future__ import annotations
 import numpy as np
-from .physics import accel
 
-def integrate(r0, v0, mu, t_final):
-    """
-    Implement your integration scheme and timestep logic.
-    You must decide how to choose dt and how to advance (r,v).
-    
+def integrate(r0: np.ndarray, v0: np.ndarray, mu: float, t_final: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Placeholder integrator.
+
+    Students must implement their own integration method here and return:
+    times, positions, velocities.
+
     Args:
-        r0: np.ndarray (2,) initial position
-        v0: np.ndarray (2,) initial velocity
-        mu: float (gravitational parameter)
-        t_final: float (total simulation time)
-
-    Returns:
-        times: np.ndarray [N]
-        positions: np.ndarray [N, 2]
-        velocities: np.ndarray [N, 2]
+        r0: (2,) initial position
+        v0: (2,) initial velocity
+        mu: gravitational parameter
+        t_final: total simulation time
     """
-    raise NotImplementedError("Implement your own integrator here.")
+    raise NotImplementedError("Students: implement your integrator returning (times, positions, velocities)")

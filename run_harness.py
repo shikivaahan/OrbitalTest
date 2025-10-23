@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from src.harness import run_challenge
-from src.constants import MU, R_P, V_P, T_TOTAL, T_ORBIT
+from src.constants import MU, R_P, V_P, T_TOTAL
 from src.physics import energy, angular_momentum_z
 from src.stepper import integrate
 from src.reference_orbit import reference_ellipse
@@ -20,11 +20,11 @@ if __name__ == "__main__":
     print("="*50)
     
     # Generate visualization
-    print("\nGenerating visualization for first 2 orbits...")
+    print("\nGenerating visualization for all orbits...")
     r0 = np.array([R_P, 0.0])
     v0 = np.array([0.0, V_P])
     
-    t, r, v = integrate(r0, v0, MU, 2 * T_ORBIT)
+    t, r, v = integrate(r0, v0, MU, T_TOTAL)
     
     E = np.array([energy(ri, vi, MU) for ri, vi in zip(r, v)])
     L = np.array([angular_momentum_z(ri, vi) for ri, vi in zip(r, v)])
@@ -32,11 +32,11 @@ if __name__ == "__main__":
     fig, axs = plt.subplots(1, 3, figsize=(15, 4))
     
     # Trajectory
-    axs[0].plot(r[:,0], r[:,1], lw=1, label='Computed')
+    axs[0].plot(r[:,0], r[:,1], lw=0.5, label='Computed', alpha=0.7)
     x_ref, y_ref = reference_ellipse()
     axs[0].plot(x_ref, y_ref, 'k--', alpha=0.5, label='Reference')
     axs[0].set_aspect('equal')
-    axs[0].set_title("Trajectory (2 orbits)")
+    axs[0].set_title("Trajectory")
     axs[0].set_xlabel("x")
     axs[0].set_ylabel("y")
     axs[0].legend()

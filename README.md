@@ -143,7 +143,7 @@ Use these plots to sanity-check periodicity and conservation quality.
 
 ## 📬 Submission Instructions
 
-Deadline: 26/10/25 23:00 (local time). Late submissions may be ignored.
+Deadline: 26/10/25 23:00 (UK time). Late submissions may be ignored.
 
 Submit ONLY your modified `stepper.py` via email.
 
